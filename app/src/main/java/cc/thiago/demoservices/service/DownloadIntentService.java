@@ -2,7 +2,9 @@ package cc.thiago.demoservices.service;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.ResultReceiver;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,6 +23,8 @@ public class DownloadIntentService extends IntentService {
     public static final int DOWNLOAD_ERRO = 0;
 
     public static final String FILE_PATH = "filePath";
+    public static final String URL_DOWNLOAD = "url";
+    public static final String RESULT_RECEIVER = "resultReceiver";
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -33,7 +37,10 @@ public class DownloadIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        String url = intent.getStringExtra("url");
+        String url = intent.getStringExtra(DownloadIntentService.URL_DOWNLOAD);
+        final ResultReceiver receiver = intent.getParcelableExtra(
+                DownloadIntentService.RESULT_RECEIVER);
+
         File file = new File(
                 Environment.getExternalStorageDirectory()
                 .getAbsolutePath(), "imagemservice.png");
@@ -63,9 +70,15 @@ public class DownloadIntentService extends IntentService {
             out.close();
             is.close();
 
+            Bundle bundle = new Bundle();
+            bundle.putString(FILE_PATH, file.getPath());
+            receiver.send(DOWNLOAD_SUCESSO, bundle);
+
         } catch (IOException e) {
+            receiver.send(DOWNLOAD_ERRO, Bundle.EMPTY);
             e.printStackTrace();
         } catch (Exception e) {
+            receiver.send(DOWNLOAD_ERRO, Bundle.EMPTY);
             e.printStackTrace();
         }
     }

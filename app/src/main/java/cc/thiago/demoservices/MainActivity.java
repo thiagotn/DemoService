@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etUrlImagem;
     private ImageView ivImagem;
+    private DownloadResultReceiver downloadResultReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         etUrlImagem = (EditText) findViewById(R.id.etUrlImagem);
         ivImagem = (ImageView) findViewById(R.id.ivImagem);
+        downloadResultReceiver = new DownloadResultReceiver(new Handler());
     }
 
     public void iniciarServico(View view) {
@@ -40,7 +42,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void baixarImagem(View view) {
+        Intent i = new Intent(MainActivity.this, DownloadResultReceiver.class);
+        i.putExtra(DownloadIntentService.URL_DOWNLOAD,
+                etUrlImagem.getText().toString());
 
+        i.putExtra(DownloadIntentService.RESULT_RECEIVER,
+                downloadResultReceiver);
+
+        startService(i);
     }
 
     private class DownloadResultReceiver extends ResultReceiver {
